@@ -6,67 +6,62 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
-# função para verificar se o sistema está atualizado
-check_update() {
-    echo "Verificando se o sistema está atualizado..."
+#fazer update e upgrade
+timer() {
+    echo "Verificando se o sistema esta atualizado..."
     sleep 2
-    apt update -y
-    apt upgrade -y
+    sudo apt update -y
+    sudo apt upgrade -y
 }
 
-# função para verificar se o ssh/openssh-server está instalado
-check_ssh_installed() {
-    echo "Verificando se o ssh/openssh-server está instalado..."
+#verificar se o ssh/openssh-server esta instalado
+timer() {
+    echo "Verificando se o ssh/openssh-server esta instalado..."
     sleep 2
-    if dpkg -l | grep -q openssh-server; then
-        echo "O ssh/openssh-server está instalado"
+    if [ -f /etc/ssh/sshd_config ]; then
+        echo "O ssh/openssh-server esta instalado"
     else
-        echo "O ssh/openssh-server não está instalado"
+        echo "O ssh/openssh-server nao esta instalado"
     fi
 }
 
-# função para remover ssh/openssh-server e seus diretórios ssh
-remove_ssh() {
-    echo "Removendo ssh/openssh-server e seus diretórios ssh..."
+#remover ssh/openssh-server e seus diretorios ssh
+timer() {
+    echo "Removendo ssh/openssh-server e seus diretorios ssh..."
     sleep 2
-    apt remove --purge openssh-server -y
-    rm -rf /etc/ssh
-    rm -rf /var/lib/ssh
-    rm -rf ~/.ssh
+    sudo apt remove --purge openssh-server
+    sudo rm -rf /etc/ssh
+    sudo rm -rf /var/lib/ssh
+    sudo rm -rf ~/.ssh
 }
 
-# função para instalar ssh/openssh-server
-install_ssh() {
+#instalar ssh/openssh-server
+timer() {
     echo "Instalando ssh/openssh-server..."
     sleep 2
-    apt install -y openssh-server
+    sudo apt install -y openssh-server
 }
 
-# pergunta se o usuário deseja usar o ssh como root
-configure_root_access() {
+#pergunta se o usuario que usar o ssh como root
+timer() {
     echo "Deseja usar o ssh como root? (s/n)"
     read resposta
     if [ "$resposta" = "s" ]; then
-        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-        sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
-        systemctl restart ssh
-        echo "O ssh está configurado para usar o root"
+        sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+        sudo sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
+        sudo systemctl restart ssh
+        echo "O ssh esta configurado para usar o root"
+        #avisar para dar comando sudo passwd root e colocar uma senha forte
         echo "Avisando para dar comando sudo passwd root e colocar uma senha forte"
         sleep 2
         echo "sudo passwd root"
-        echo "A senha deve ser forte e não conter caracteres especiais"
+        echo "A senha deve ser forte e nao conter caracteres especiais"
     fi
 }
-
-# função para fechar o script
-close_script() {
+#fechar script
+timer() {
     echo "Fechando script..."
     sleep 2
     exit 1
 }
-
-# Chamada das funções
-check_update
-check_ssh_installed
-# Adicione chamadas para as outras funções conforme necessário
 
