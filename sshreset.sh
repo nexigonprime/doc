@@ -48,7 +48,7 @@ install_ssh() {
 # pergunta se o usuário deseja usar o ssh como root
 configure_root_access() {
     timer "Deseja usar o ssh como root? (s/n)"
-    read resposta
+    read -r resposta
     if [ "$resposta" = "s" ]; then
         sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
         sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
@@ -56,6 +56,8 @@ configure_root_access() {
         echo "O ssh está configurado para usar o root"
         echo "Avisando para dar comando 'passwd root' e colocar uma senha forte"
         echo "A senha deve ser forte e não conter caracteres especiais"
+    else
+        echo "Configuração do acesso root cancelada."
     fi
 }
 
