@@ -18,8 +18,10 @@ check_ssh_installed() {
     timer "Verificando se o ssh/openssh-server está instalado..."
     if dpkg -l | grep -q openssh-server; then
         echo "O ssh/openssh-server está instalado"
+        return 0  # Retorna 0 se instalado
     else
         echo "O ssh/openssh-server não está instalado"
+        return 1  # Retorna 1 se não instalado
     fi
 }
 
@@ -65,6 +67,17 @@ close_script() {
 
 # Chamada das funções
 update_system
-check_ssh_installed
-# Adicione chamadas para as outras funções conforme necessário
+if check_ssh_installed; then
+    # Se o SSH estiver instalado, pergunte se deseja removê-lo
+    remove_ssh
+else
+    # Se o SSH não estiver instalado, pergunte se deseja instalá-lo
+    install_ssh
+fi
+
+# Pergunta se o usuário deseja configurar o acesso root
+configure_root_access
+
+# Fechar o script
+close_script
 
