@@ -1,67 +1,70 @@
 #!/bin/bash
 
-# verificar acesso root
-if [ "$EUID" -ne 0 ]; then
-    echo "Por favor, execute este script como root"
-    exit 1
-fi
-
-#fazer update e upgrade
+# função para exibir mensagens e executar comandos
 timer() {
-    echo "Verificando se o sistema esta atualizado..."
+    echo "$1"
     sleep 2
-    sudo apt update -y
-    sudo apt upgrade -y
 }
 
-#verificar se o ssh/openssh-server esta instalado
-timer() {
-    echo "Verificando se o ssh/openssh-server esta instalado..."
-    sleep 2
-    if [ -f /etc/ssh/sshd_config ]; then
-        echo "O ssh/openssh-server esta instalado"
+# fazer update e upgrade
+update_system() {
+    timer "Verificando se o sistema está atualizado..."
+    apt update -y
+    apt upgrade -y
+}
+
+# verificar se o ssh/openssh-server está instalado
+check_ssh_installed() {
+    timer "Verificando se o ssh/openssh-server está instalado..."
+    if dpkg -l | grep -q openssh-server; then
+        echo "O ssh/openssh-server está instalado"
     else
-        echo "O ssh/openssh-server nao esta instalado"
+        echo "O ssh/openssh-server não está instalado"
     fi
 }
 
-#remover ssh/openssh-server e seus diretorios ssh
-timer() {
-    echo "Removendo ssh/openssh-server e seus diretorios ssh..."
-    sleep 2
-    sudo apt remove --purge openssh-server
-    sudo rm -rf /etc/ssh
-    sudo rm -rf /var/lib/ssh
-    sudo rm -rf ~/.ssh
+# remover ssh/openssh-server e seus diretórios ssh
+remove_ssh() {
+    timer "Removendo ssh/openssh-server e seus diretórios ssh..."
+    read -p "Tem certeza que deseja remover o ssh/openssh-server? (s/n) " confirm
+    if [ "$confirm" = "s" ]; then
+        apt remove --purge openssh-server -y
+        rm -rf /etc/ssh
+        rm -rf /var/lib/ssh
+        rm -rf ~/.ssh
+    else
+        echo "Remoção cancelada."
+    fi
 }
 
-#instalar ssh/openssh-server
-timer() {
-    echo "Instalando ssh/openssh-server..."
-    sleep 2
-    sudo apt install -y openssh-server
+# instalar ssh/openssh-server
+install_ssh() {
+    timer "Instalando ssh/openssh-server..."
+    apt install -y openssh-server
 }
 
-#pergunta se o usuario que usar o ssh como root
-timer() {
-    echo "Deseja usar o ssh como root? (s/n)"
+# pergunta se o usuário deseja usar o ssh como root
+configure_root_access() {
+    timer "Deseja usar o ssh como root? (s/n)"
     read resposta
     if [ "$resposta" = "s" ]; then
-        sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-        sudo sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
-        sudo systemctl restart ssh
-        echo "O ssh esta configurado para usar o root"
-        #avisar para dar comando sudo passwd root e colocar uma senha forte
-        echo "Avisando para dar comando sudo passwd root e colocar uma senha forte"
-        sleep 2
-        echo "sudo passwd root"
-        echo "A senha deve ser forte e nao conter caracteres especiais"
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+        sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
+        systemctl restart ssh
+        echo "O ssh está configurado para usar o root"
+        echo "Avisando para dar comando 'passwd root' e colocar uma senha forte"
+        echo "A senha deve ser forte e não conter caracteres especiais"
     fi
 }
-#fechar script
-timer() {
-    echo "Fechando script..."
-    sleep 2
+
+# fechar script
+close_script() {
+    timer "Fechando script..."
     exit 1
 }
+
+# Chamada das funções
+update_system
+check_ssh_installed
+# Adicione chamadas para as outras funções conforme necessário
 
