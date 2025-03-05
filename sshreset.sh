@@ -9,8 +9,8 @@ timer() {
 # fazer update e upgrade
 update_system() {
     timer "Verificando se o sistema está atualizado..."
-    apt update -y
-    apt upgrade -y
+    sudo apt update -y
+    sudo apt upgrade -y
 }
 
 # verificar se o ssh/openssh-server está instalado
@@ -30,10 +30,10 @@ remove_ssh() {
     timer "Removendo ssh/openssh-server e seus diretórios ssh..."
     read -p "Tem certeza que deseja remover o ssh/openssh-server? (s/n) " confirm
     if [ "$confirm" = "s" ]; then
-        apt remove --purge openssh-server -y
-        rm -rf /etc/ssh
-        rm -rf /var/lib/ssh
-        rm -rf ~/.ssh
+        sudo apt remove --purge openssh-server -y
+        sudo rm -rf /etc/ssh
+        sudo rm -rf /var/lib/ssh
+        sudo rm -rf ~/.ssh
     else
         echo "Remoção cancelada."
     fi
@@ -42,7 +42,7 @@ remove_ssh() {
 # instalar ssh/openssh-server
 install_ssh() {
     timer "Instalando ssh/openssh-server..."
-    apt install -y openssh-server
+    sudo apt install -y openssh-server
 }
 
 # pergunta se o usuário deseja usar o ssh como root
@@ -50,9 +50,9 @@ configure_root_access() {
     timer "Deseja usar o ssh como root? (s/n)"
     read -r resposta
     if [ "$resposta" = "s" ]; then
-        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
-        sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
-        systemctl restart ssh
+        sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+        sudo sed -i 's/#PasswordAuthentication no/PasswordAuthentication yes/' /etc/ssh/sshd_config 
+        sudo systemctl restart ssh
         echo "O ssh está configurado para usar o root"
         echo "Avisando para dar comando 'passwd root' e colocar uma senha forte"
         echo "A senha deve ser forte e não conter caracteres especiais"
